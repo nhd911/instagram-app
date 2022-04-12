@@ -170,6 +170,9 @@ class MyApp extends StatelessWidget {
           buttonColor: Colors.pink,
           primaryIconTheme: const IconThemeData(color: Colors.black)),
       home: HomePage(title: 'Instagram'),
+      routes: {
+        '/profile': (context) =>  ProfilePage(id: googleSignIn.currentUser!.id),
+      },
     );
   }
 }
@@ -326,7 +329,7 @@ class _HomePageState extends State<HomePage> {
                   child: Uploader(),
                 ),
                 Container(color: Colors.white, child: ActivityFeedPage()),
-                Container(color: Colors.white, child: ProfilePage()),
+                Container(color: Colors.white, child: ProfilePage(id: googleSignIn.currentUser!.id,)),
               ],
               controller: pageController,
               physics: const NeverScrollableScrollPhysics(),

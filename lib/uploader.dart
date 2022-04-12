@@ -29,7 +29,7 @@ class _MyStatefulWidgetState extends State<Uploader> {
         ? Scaffold(
             appBar: AppBar(
               title:
-                  Text("Upload image", style: TextStyle(color: Colors.black)),
+                  const Text("Upload image", style: TextStyle(color: Colors.black)),
               backgroundColor: Colors.white70,
             ),
             body: Container(

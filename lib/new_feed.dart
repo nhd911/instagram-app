@@ -6,6 +6,7 @@ import 'main.dart';
 import 'dart:async';
 import 'models/user.dart';
 import 'theme/color.dart';
+import 'uploader.dart';
 
 class NewFeed extends StatefulWidget {
   @override
@@ -13,28 +14,8 @@ class NewFeed extends StatefulWidget {
   State<NewFeed> createState() => _NewFeed();
 }
 
-class _NewFeed extends State<NewFeed> with AutomaticKeepAliveClientMixin<NewFeed> {
-  final AppTopBar = AppBar(
-    backgroundColor: Color(0XFFF8faf8),
-    elevation: 1.0,
-    centerTitle: true,
-    leading: const Icon(
-      Icons.camera_alt,
-      color: Colors.black,
-    ),
-    title: SizedBox(
-        height: 35.0, child: Image.asset("assets/images/instatexticon.png")),
-    actions: const <Widget>[
-      Padding(
-        padding: EdgeInsets.only(right: 12.0),
-        child: Icon(
-          Icons.send,
-          color: Colors.black,
-        ),
-      )
-    ],
-  );
-
+class _NewFeed extends State<NewFeed>
+    with AutomaticKeepAliveClientMixin<NewFeed> {
   bool _isLoading = true;
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
@@ -47,11 +28,11 @@ class _NewFeed extends State<NewFeed> with AutomaticKeepAliveClientMixin<NewFeed
 
   @override
   void initState() {
-    _fetchPosts();
+    _getPosts();
     super.initState();
   }
 
-  Future<void> _fetchPosts() async {
+  Future<void> _getPosts() async {
     try {
       setState(() {
         _isLoading = true;
@@ -96,16 +77,68 @@ class _NewFeed extends State<NewFeed> with AutomaticKeepAliveClientMixin<NewFeed
     // TODO: implement build
     if (_isLoading) {
       return Scaffold(
-          appBar: AppTopBar,
+          appBar: AppBar(
+            backgroundColor: Color(0XFFF8faf8),
+            elevation: 1.0,
+            centerTitle: true,
+            leading: IconButton(
+              icon: const Icon(Icons.camera_alt),
+              color: Colors.black,
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const Uploader()),
+                );
+              },
+            ),
+            title: SizedBox(
+                height: 35.0,
+                child: Image.asset("assets/images/instatexticon.png")),
+            actions: const <Widget>[
+              Padding(
+                padding: EdgeInsets.only(right: 12.0),
+                child: Icon(
+                  Icons.send,
+                  color: Colors.black,
+                ),
+              )
+            ],
+          ),
           body: Container(
             child: LinearProgressIndicator(),
           ));
     }
     return Scaffold(
-        appBar: AppTopBar,
+        appBar: AppBar(
+          backgroundColor: Color(0XFFF8faf8),
+          elevation: 1.0,
+          centerTitle: true,
+          leading: IconButton(
+            icon: const Icon(Icons.camera_alt),
+            color: Colors.black,
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const Uploader()),
+              );
+            },
+          ),
+          title: SizedBox(
+              height: 35.0,
+              child: Image.asset("assets/images/instatexticon.png")),
+          actions: const <Widget>[
+            Padding(
+              padding: EdgeInsets.only(right: 12.0),
+              child: Icon(
+                Icons.send,
+                color: Colors.black,
+              ),
+            )
+          ],
+        ),
         body: Container(
             child: RefreshIndicator(
-          onRefresh: _fetchPosts,
+          onRefresh: _getPosts,
           child: ListView.builder(
             itemCount: posts.length,
             itemBuilder: (ctx, i) {

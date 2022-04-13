@@ -137,5 +137,5 @@ class _SearchPage extends State<SearchPage>
 
   @override
   // TODO: implement wantKeepAlive
-  bool get wantKeepAlive => true;
+  bool get wantKeepAlive => false;
 }

@@ -51,7 +51,7 @@ class _ProfileScreenState extends State<ProfilePage> {
     follower = userSnap.data()!['followers'].length;
     following = userSnap.data()!['following'].length;
     isFollowing = userSnap.data()!["following"].keys.contains(widget.id);
-    print(isFollowing);
+    // print(isFollowing);
     // print(userData["username"]);
 
     setState(() {
@@ -68,26 +68,31 @@ class _ProfileScreenState extends State<ProfilePage> {
         : Scaffold(
             appBar: AppBar(
                 title: Text(userData["username"],
-                    style: TextStyle(color: Colors.black)),
+                    style: const TextStyle(color: Colors.black)),
                 backgroundColor: Colors.white70,
                 actions: [
-                  PopupMenuButton(
-                    icon: const Icon(
-                      Icons.more_vert,
-                      color: Colors.black,
-                    ),
-                    itemBuilder: (context) => [
-                      const PopupMenuItem(
-                        child: Text("Log out"),
-                        value: 1,
-                      )
-                    ],
-                    onSelected: (value) {
-                      if (value == 1) {
-                        _logout(context);
-                      }
-                    },
-                  ),
+                  (googleSignIn.currentUser!.id == widget.id)
+                      ? PopupMenuButton(
+                          icon: const Icon(
+                            Icons.more_vert,
+                            color: Colors.black,
+                          ),
+                          itemBuilder: (context) => [
+                            const PopupMenuItem(
+                              child: Text("Log out"),
+                              value: 1,
+                            )
+                          ],
+                          onSelected: (value) {
+                            if (value == 1) {
+                              _logout(context);
+                            }
+                          },
+                        )
+                      : const Icon(
+                          Icons.more_vert,
+                          color: Colors.black,
+                        )
                 ]),
             body: ListView(children: [
               Padding(
@@ -114,8 +119,11 @@ class _ProfileScreenState extends State<ProfilePage> {
                               ],
                             ),
                             (widget.id == googleSignIn.currentUser!.id)
-                                ? EditProfile()
-                                : const Text("Khong co gi ca")
+                                ? editButton(context)
+                                : const Padding(
+                                  padding: EdgeInsets.all(8.0),
+                                  child: Text("Chưa làm follow"),
+                                )
                           ]))
                     ]),
                     Container(
@@ -182,6 +190,33 @@ class _ProfileScreenState extends State<ProfilePage> {
           );
   }
 
+  editButton(BuildContext context) => Container(
+    padding: const EdgeInsets.only(top: 2),
+    child: TextButton(
+      onPressed: () => openEdit(context),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(
+            color: Colors.black,
+          ),
+          borderRadius: BorderRadius.circular(5),
+        ),
+        alignment: Alignment.center,
+        child: const Text(
+          "Edit profile",
+          style: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        width: 250,
+        height: 27,
+      ),
+    ),
+  );
+
+
   Column columnInfor(int num, String label) {
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -221,6 +256,12 @@ void openProfile(BuildContext context, String id) {
   }
 }
 
+void openEdit(BuildContext context){
+  Navigator.of(context)
+      .push(MaterialPageRoute<bool>(builder: (BuildContext context) {
+    return EditProfile();
+  }));
+}
 void _logout(BuildContext context) async {
   // print("logout");
   await auth.signOut();

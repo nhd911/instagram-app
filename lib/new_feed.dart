@@ -7,6 +7,7 @@ import 'dart:async';
 import 'models/user.dart';
 import 'theme/color.dart';
 import 'uploader.dart';
+import 'profile.dart';
 
 class NewFeed extends StatefulWidget {
   @override
@@ -91,9 +92,13 @@ class _NewFeed extends State<NewFeed>
                 );
               },
             ),
-            title: SizedBox(
+            title: const SizedBox(
                 height: 35.0,
-                child: Image.asset("assets/images/instatexticon.png")),
+                child: Text("Dynogram",
+                    style: TextStyle(
+                        color: Colors.black,
+                        fontFamily: "Billabong",
+                        fontSize: 30.0))),
             actions: const <Widget>[
               Padding(
                 padding: EdgeInsets.only(right: 12.0),
@@ -123,9 +128,13 @@ class _NewFeed extends State<NewFeed>
               );
             },
           ),
-          title: SizedBox(
-              height: 35.0,
-              child: Image.asset("assets/images/instatexticon.png")),
+          title: const SizedBox(
+              height: 38.0,
+              child: Text("Dynogram",
+                  style: TextStyle(
+                      color: Colors.black,
+                      fontFamily: "Billabong",
+                      fontSize: 30.0))),
           actions: const <Widget>[
             Padding(
               padding: EdgeInsets.only(right: 12.0),
@@ -164,27 +173,32 @@ class _NewFeed extends State<NewFeed>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    Row(
-                      children: [
-                        Container(
-                          height: 40.0,
-                          width: 40.0,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            image: DecorationImage(
-                                fit: BoxFit.fill,
-                                image: NetworkImage(
-                                    id_avatar[posts[i]["ownerId"]])),
+                    GestureDetector(
+                      child: Row(
+                        children: [
+                          Container(
+                            height: 40.0,
+                            width: 40.0,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              image: DecorationImage(
+                                  fit: BoxFit.fill,
+                                  image: NetworkImage(
+                                      id_avatar[posts[i]["ownerId"]])),
+                            ),
                           ),
-                        ),
-                        const SizedBox(
-                          width: 10.0,
-                        ),
-                        Text(
-                          posts[i]["username"],
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                      ],
+                          const SizedBox(
+                            width: 10.0,
+                          ),
+                          Text(
+                            posts[i]["username"],
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      onTap: () => openProfile(context, posts[i]["ownerId"]),
                     ),
                     const SizedBox(
                       height: 10,

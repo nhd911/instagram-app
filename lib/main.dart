@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:test_flutter/tmp/HomePage.dart';
 import 'package:flutter/cupertino.dart';
@@ -17,6 +16,7 @@ import 'profile.dart';
 import 'search_page.dart';
 import 'uploader.dart';
 import 'new_feed.dart';
+import 'package:flutter_auth_buttons/flutter_auth_buttons.dart';
 
 final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
 
@@ -50,7 +50,6 @@ Future<void> _ensureLoggedIn(BuildContext context) async {
       idToken: googleAuth.idToken,
     );
 
-
     await auth.signInWithCredential(credential);
   }
 }
@@ -76,19 +75,6 @@ Future<Null> _silentLogin(BuildContext context) async {
     await auth.signInWithCredential(credential);
   }
 }
-
-// Future<Null> _setUpNotifications() async {
-//   if (Platform.isAndroid) {
-//     _firebaseMessaging.getToken().then((token) {
-//       print("Firebase Messaging Token: " + token!);
-//
-//       FirebaseFirestore.instance
-//           .collection("insta_users")
-//           .doc(currentUserModel?.id)
-//           .update({"androidNotificationToken": token});
-//     });
-//   }
-// }
 
 Future<void> tryCreateUserRecord(BuildContext context) async {
   GoogleSignInAccount? user = googleSignIn.currentUser;
@@ -158,20 +144,14 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Instagram',
       theme: ThemeData(
-          // This is the theme of your application.
-          //
-          // Try running your application with "flutter run". You'll see the
-          // application has a blue toolbar. Then, without quitting the app, try
-          // changing the primarySwatch below to Colors.green and then invoke
-          // "hot reload" (press "r" in the console where you ran "flutter run",
-          // or press Run > Flutter Hot Reload in IntelliJ). Notice that the
-          // counter didn't reset back to zero; the application is not restarted.
           primarySwatch: Colors.blue,
           buttonColor: Colors.pink,
-          primaryIconTheme: const IconThemeData(color: Colors.black)),
+          primaryIconTheme: const IconThemeData(color: Colors.black),
+          appBarTheme:
+              const AppBarTheme(iconTheme: IconThemeData(color: Colors.black))),
       home: HomePage(title: 'Instagram'),
       routes: {
-        '/profile': (context) =>  ProfilePage(id: googleSignIn.currentUser!.id),
+        '/profile': (context) => ProfilePage(id: googleSignIn.currentUser!.id),
       },
     );
   }
@@ -211,62 +191,63 @@ class _HomePageState extends State<HomePage> {
                     padding: EdgeInsets.only(top: 100, left: 0.0),
                     child: Container(
                         alignment: Alignment.center,
-                        child: const Image(
-                          image: AssetImage('assets/images/instatexticon.png'),
-                          height: 75.0,
-                        )),
+                        child: const Text("Dynogram",
+                            style: TextStyle(
+                                color: Colors.black,
+                                fontFamily: "Billabong",
+                                fontSize: 70.0))),
                   ),
                 ),
-                // SafeArea(
-                //   child: Padding(
-                //     padding: EdgeInsets.all(18.0),
-                //     child: Container(
-                //         alignment: Alignment.centerLeft,
-                //         child: const Text(
-                //           "Please sign in to continue ...",
-                //           style: TextStyle(
-                //             fontSize: 16,
-                //             color: Colors.grey,
-                //           ),
-                //         )),
-                //   ),
-                // )
               ],
             ),
             const Padding(
               padding: EdgeInsets.only(left: 12, right: 12.0),
               child: Image(
-                width: 200.0,
-                height: 200.0,
-                image: AssetImage('assets/images/Instagram_logo_2016.svg.webp'),
+                width: 250.0,
+                height: 250.0,
+                image: AssetImage('assets/images/dyno.png'),
               ),
             ),
-            GestureDetector(
-              onTap: login,
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 30.0),
-                child: Container(
-                  width: 260.0,
-                  height: 60.0,
-                  decoration: BoxDecoration(
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.blue.withOpacity(0.2),
-                        spreadRadius: 5,
-                        blurRadius: 5,
-                        offset: Offset(1, 3), // changes position of shadow
-                      ),
-                    ],
-                    image: const DecorationImage(
-                      image: AssetImage(
-                        'assets/images/google_signin_button.png',
-                      ),
-                      fit: BoxFit.cover,
+            const SizedBox(height: 25.0),
+            triedSilentLogin
+                ? GoogleSignInButton(
+                    onPressed: () => login(),
+                    darkMode: false,
+                  )
+                // ? GestureDetector(
+                //     onTap: login,
+                //     child: Padding(
+                //       padding: const EdgeInsets.only(bottom: 30.0),
+                //       child: Container(
+                //         width: 260.0,
+                //         height: 60.0,
+                //         decoration: BoxDecoration(
+                //           boxShadow: [
+                //             BoxShadow(
+                //               color: Colors.blue.withOpacity(0.2),
+                //               spreadRadius: 5,
+                //               blurRadius: 5,
+                //               offset:
+                //                   Offset(1, 3), // changes position of shadow
+                //             ),
+                //           ],
+                //           image: const DecorationImage(
+                //             image: AssetImage(
+                //               'assets/images/google_signin_button.png',
+                //             ),
+                //             fit: BoxFit.cover,
+                //           ),
+                //         ),
+                //       ),
+                //     ),
+                //   )
+                : const Padding(
+                    padding: EdgeInsets.all(15.0),
+                    child: Center(
+                      child: CircularProgressIndicator(),
                     ),
                   ),
-                ),
-              ),
-            )
+            const SizedBox(height: 25.0)
           ],
         ),
       ),
@@ -277,7 +258,7 @@ class _HomePageState extends State<HomePage> {
     backgroundColor: Color(0XFFF8faf8),
     elevation: 1.0,
     centerTitle: true,
-    leading: Icon(
+    leading: const Icon(
       Icons.camera_alt,
       color: Colors.black,
     ),
@@ -329,7 +310,11 @@ class _HomePageState extends State<HomePage> {
                   child: Uploader(),
                 ),
                 Container(color: Colors.white, child: ActivityFeedPage()),
-                Container(color: Colors.white, child: ProfilePage(id: googleSignIn.currentUser!.id,)),
+                Container(
+                    color: Colors.white,
+                    child: ProfilePage(
+                      id: googleSignIn.currentUser!.id,
+                    )),
               ],
               controller: pageController,
               physics: const NeverScrollableScrollPhysics(),
@@ -378,13 +363,6 @@ class _HomePageState extends State<HomePage> {
       // globalUserModel = currentUserModel;
     });
   }
-
-  // void setUpNotifications() {
-  //   _setUpNotifications();
-  //   setState(() {
-  //     setupNotifications = true;
-  //   });
-  // }
 
   void silentLogin(BuildContext context) async {
     await _silentLogin(context);

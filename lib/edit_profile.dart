@@ -132,15 +132,16 @@ class _MyStatefulWidgetState extends State<EditProfile> {
             ),
             body: Column(children: <Widget>[
               loading
-                  ? LinearProgressIndicator()
-                  : Padding(padding: EdgeInsets.only(top: 0.0)),
-              Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                  ? const LinearProgressIndicator()
+                  : const Padding(padding: EdgeInsets.only(top: 0.0)),
+              const Padding(padding: EdgeInsets.only(top: 100.0)),
+              // Column(mainAxisAlignment: MainAxisAlignment.center, children: [
                 Center(
                     child: CircleAvatar(
                   radius: 120.0, // Image radius
                   backgroundImage: FileImage(file!),
                 ))
-              ]),
+              // ]),
             ]));
   }
 

@@ -22,6 +22,10 @@ class _ProfileScreenState extends State<ProfilePage> {
   int following = 0;
   bool isLoading = false;
   bool isFollowing = false;
+  var follower_users;
+  var following_users;
+
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
 
   @override
   void initState() {
@@ -46,11 +50,19 @@ class _ProfileScreenState extends State<ProfilePage> {
         .where('ownerId', isEqualTo: widget.id)
         .get();
 
+    var currSnap = await FirebaseFirestore.instance
+        .collection("insta_users")
+        .doc(googleSignIn.currentUser!.id)
+        .get();
+
     postLength = postSnap.docs.length;
     userData = userSnap.data()!;
+    follower_users = userSnap.data()!['followers'];
+    following_users = currSnap.data()!['following'];
     follower = userSnap.data()!['followers'].length;
     following = userSnap.data()!['following'].length;
-    isFollowing = userSnap.data()!["following"].keys.contains(widget.id);
+    isFollowing = userSnap.data()!["followers"].keys.contains(googleSignIn.currentUser!.id);
+    // isFollowing = true;
     // print(isFollowing);
     // print(userData["username"]);
 
@@ -120,10 +132,7 @@ class _ProfileScreenState extends State<ProfilePage> {
                             ),
                             (widget.id == googleSignIn.currentUser!.id)
                                 ? editButton(context)
-                                : const Padding(
-                                  padding: EdgeInsets.all(8.0),
-                                  child: Text("Chưa làm follow"),
-                                )
+                                : isFollowing ? unfollowButton(context) : followButton(context)
                           ]))
                     ]),
                     Container(
@@ -216,6 +225,103 @@ class _ProfileScreenState extends State<ProfilePage> {
     ),
   );
 
+  followButton(BuildContext context) => Container(
+    padding: const EdgeInsets.only(top: 2),
+    child: TextButton(
+      onPressed: () => _follow(),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.blue,
+          border: Border.all(
+            color: Colors.blue,
+          ),
+          borderRadius: BorderRadius.circular(5),
+        ),
+        alignment: Alignment.center,
+        child: const Text(
+          "Follow",
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        width: 250,
+        height: 27,
+      ),
+    ),
+  );
+
+
+  unfollowButton(BuildContext context) => Container(
+    padding: const EdgeInsets.only(top: 2),
+    child: TextButton(
+      onPressed: () => _unfollow(),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(
+            color: Colors.black,
+          ),
+          borderRadius: BorderRadius.circular(5),
+        ),
+        alignment: Alignment.center,
+        child: const Text(
+          "Following",
+          style: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        width: 250,
+        height: 27,
+      ),
+    ),
+  );
+
+
+  void _follow() async {
+
+    following_users[widget.id] = 1;
+    follower_users[googleSignIn.currentUser!.id] = 1;
+
+    await _db
+        .collection("insta_users")
+        .doc(googleSignIn.currentUser!.id)
+        .update({"following": following_users});
+
+    await _db
+        .collection("insta_users")
+        .doc(widget.id)
+        .update({"followers": follower_users});
+
+    setState(() {
+      follower += 1;
+      isFollowing = true;
+    });
+  }
+
+  void _unfollow() async {
+    follower_users.removeWhere((key, value) =>
+        key == googleSignIn.currentUser!.id);
+
+    following_users.removeWhere((key, value) =>
+        key == widget.id);
+
+    await _db
+        .collection("insta_users")
+        .doc(googleSignIn.currentUser!.id)
+        .update({"following": following_users});
+
+    await _db
+        .collection("insta_users")
+        .doc(widget.id)
+        .update({"followers": follower_users});
+
+    setState(() {
+      follower -= 1;
+      isFollowing = false;
+    });
+  }
 
   Column columnInfor(int num, String label) {
     return Column(
@@ -243,6 +349,9 @@ class _ProfileScreenState extends State<ProfilePage> {
       ],
     );
   }
+
+
+
 }
 
 void openProfile(BuildContext context, String id) {

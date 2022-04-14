@@ -27,6 +27,7 @@ class _NewFeed extends State<NewFeed>
   var check_like = List<bool>.filled(100, false, growable: true);
   var total_like = List<int>.filled(100, 0, growable: true);
 
+
   @override
   void initState() {
     _getPosts();
@@ -38,11 +39,33 @@ class _NewFeed extends State<NewFeed>
       setState(() {
         _isLoading = true;
       });
+
+      var following_users = List<String>.filled(0, '0', growable: true);
+      following_users.add(googleSignIn.currentUser!.id);
+
+      var followingSnap = await _db
+          .collection("insta_users")
+          .doc(googleSignIn.currentUser!.id)
+          .get();
+
+      var tmp = followingSnap.data()!["following"].keys;
+
+      for(var i in tmp){
+        following_users.add(i);
+      }
+
+      // print("111111 $following_users");
+      // print(following_users.runtimeType);
       QuerySnapshot snap = await _db
           .collection("insta-post")
+          .where("ownerId", whereIn: following_users)
           .orderBy("timestamp", descending: true)
           .get();
-      QuerySnapshot snap_user = await _db.collection("insta_users").get();
+      // print(snap);
+      // print(snap.docs);
+      QuerySnapshot snap_user = await _db.collection("insta_users")
+          .where("id", whereIn: following_users)
+          .get();
 
       list_users = snap_user.docs;
       for (var user in list_users) {

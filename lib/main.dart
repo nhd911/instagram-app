@@ -92,7 +92,7 @@ Future<void> tryCreateUserRecord(BuildContext context) async {
                 child: Scaffold(
                     appBar: AppBar(
                       leading: Container(),
-                      title: const Text('Fill out missing data',
+                      title: const Text('Enter username',
                           style: TextStyle(
                               color: Colors.black,
                               fontWeight: FontWeight.bold)),
@@ -176,7 +176,7 @@ class _HomePageState extends State<HomePage> {
   Scaffold buildLoginPage() {
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: Colors.white,
         ),
         alignment: Alignment.center,
@@ -188,7 +188,7 @@ class _HomePageState extends State<HomePage> {
               children: <Widget>[
                 SafeArea(
                   child: Padding(
-                    padding: EdgeInsets.only(top: 100, left: 0.0),
+                    padding: const EdgeInsets.only(top: 100, left: 0.0),
                     child: Container(
                         alignment: Alignment.center,
                         child: const Text("Dynogram",
@@ -255,7 +255,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   final AppTopBar = AppBar(
-    backgroundColor: Color(0XFFF8faf8),
+    backgroundColor: const Color(0XFFF8faf8),
     elevation: 1.0,
     centerTitle: true,
     leading: const Icon(
@@ -285,7 +285,7 @@ class _HomePageState extends State<HomePage> {
     //   setUpNotifications();
     // }
 
-    if (!firebaseInitialized) return CircularProgressIndicator();
+    if (!firebaseInitialized) return const CircularProgressIndicator();
 
     auth.authStateChanges().listen((event) {
       if (event == null) {

@@ -24,7 +24,8 @@ class _ProfileScreenState extends State<ProfilePage> {
   bool isFollowing = false;
   var follower_users;
   var following_users;
-
+  var following_users_1;
+  var following_1;
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
   @override
@@ -58,10 +59,15 @@ class _ProfileScreenState extends State<ProfilePage> {
     postLength = postSnap.docs.length;
     userData = userSnap.data()!;
     follower_users = userSnap.data()!['followers'];
+    following_users_1 = userSnap.data()!['following'];
     following_users = currSnap.data()!['following'];
     follower = userSnap.data()!['followers'].length;
     following = userSnap.data()!['following'].length;
-    isFollowing = userSnap.data()!["followers"].keys.contains(googleSignIn.currentUser!.id);
+    following_1 = following_users_1.length;
+    isFollowing = userSnap
+        .data()!["followers"]
+        .keys
+        .contains(googleSignIn.currentUser!.id);
     // isFollowing = true;
     // print(isFollowing);
     // print(userData["username"]);
@@ -126,13 +132,31 @@ class _ProfileScreenState extends State<ProfilePage> {
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: [
                                 columnInfor(postLength, "posts"),
-                                columnInfor(follower, "followers"),
-                                columnInfor(following, "following"),
+                                follower == 0
+                                    ? columnInfor(follower, "followers")
+                                    : InkWell(
+                                        child:
+                                            columnInfor(follower, "followers"),
+                                        onTap: () {
+                                          showFollower(context);
+                                        },
+                                      ),
+                                following_1 == 0
+                                    ? columnInfor(following_1, "following")
+                                    : InkWell(
+                                        child: columnInfor(
+                                            following_1, "following"),
+                                        onTap: () {
+                                          showFollowing(context);
+                                        },
+                                      ),
                               ],
                             ),
                             (widget.id == googleSignIn.currentUser!.id)
                                 ? editButton(context)
-                                : isFollowing ? unfollowButton(context) : followButton(context)
+                                : isFollowing
+                                    ? unfollowButton(context)
+                                    : followButton(context)
                           ]))
                     ]),
                     Container(
@@ -162,6 +186,7 @@ class _ProfileScreenState extends State<ProfilePage> {
                   stream: FirebaseFirestore.instance
                       .collection('insta-post')
                       .where('ownerId', isEqualTo: widget.id)
+                      .orderBy("timestamp", descending: true)
                       .snapshots(),
                   builder: (BuildContext context,
                       AsyncSnapshot<QuerySnapshot> snapshot) {
@@ -186,12 +211,40 @@ class _ProfileScreenState extends State<ProfilePage> {
                               childAspectRatio: 1,
                             ),
                             itemBuilder: (BuildContext ctx, index) {
-                              return Container(
-                                  child: Image(
-                                image: NetworkImage(
-                                    snapshot.data!.docs[index]["imageUrl"]),
-                                fit: BoxFit.cover,
-                              ));
+                              return googleSignIn.currentUser!.id != widget.id
+                                  ? Container(
+                                      child: Image(
+                                      image: NetworkImage(snapshot
+                                          .data!.docs[index]["imageUrl"]),
+                                      fit: BoxFit.cover,
+                                    ))
+                                  : GestureDetector(
+                                      child: Container(
+                                          child: Image(
+                                        image: NetworkImage(snapshot
+                                            .data!.docs[index]["imageUrl"]),
+                                        fit: BoxFit.cover,
+                                      )),
+                                      onLongPress: () => showDialog<String>(
+                                        context: context,
+                                        builder: (BuildContext context) =>
+                                            AlertDialog(
+                                          title: const Text('Delete image'),
+                                          actions: <Widget>[
+                                            TextButton(
+                                              onPressed: () => Navigator.pop(
+                                                  context, 'Cancel'),
+                                              child: const Text('Cancel'),
+                                            ),
+                                            TextButton(
+                                              onPressed: () => deleteImage(context, snapshot
+                                                  .data!.docs[index]["postId"]),
+                                              child: const Text('OK'),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    );
                             });
                     }
                   })
@@ -199,88 +252,204 @@ class _ProfileScreenState extends State<ProfilePage> {
           );
   }
 
+  void deleteImage(BuildContext context, String postId) async {
+    setState(() {
+      postLength = postLength - 1;
+    });
+    Navigator.pop(context);
+    await _db.collection("insta-post").doc(postId).delete();
+  }
+
+  void showFollower(BuildContext context) async {
+    QuerySnapshot snap = await _db
+        .collection("insta_users")
+        .where("id", whereIn: follower_users.keys.toList())
+        .get();
+
+    var list_follower = snap.docs;
+
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Follower'),
+            content: Container(
+              width: double.minPositive,
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: follower,
+                itemBuilder: (BuildContext context, int index) {
+                  return ListTile(
+                    title: Row(
+                      children: [
+                        Container(
+                            height: 40.0,
+                            width: 40.0,
+                            decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                image: DecorationImage(
+                                    fit: BoxFit.fill,
+                                    image: NetworkImage(
+                                        list_follower[index]["photoUrl"])))),
+                        const SizedBox(
+                          width: 20.0,
+                        ),
+                        Text(list_follower[index]["username"]),
+                      ],
+                    ),
+                    onTap: () =>
+                        openProfile(context, list_follower[index]["id"]),
+                  );
+                },
+              ),
+            ),
+            actions: <Widget>[
+              FlatButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text("Cancel"),
+              ),
+            ],
+          );
+        });
+  }
+
+  void showFollowing(BuildContext context) async {
+    // print(following_users);
+    QuerySnapshot snap = await _db
+        .collection("insta_users")
+        .where("id", whereIn: following_users_1.keys.toList())
+        .get();
+
+    var list_following = snap.docs;
+
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Following'),
+            content: Container(
+              width: double.minPositive,
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: following_1,
+                itemBuilder: (BuildContext context, int index) {
+                  return ListTile(
+                    title: Row(
+                      children: [
+                        Container(
+                            height: 40.0,
+                            width: 40.0,
+                            decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                image: DecorationImage(
+                                    fit: BoxFit.fill,
+                                    image: NetworkImage(
+                                        list_following[index]["photoUrl"])))),
+                        const SizedBox(
+                          width: 20.0,
+                        ),
+                        Text(list_following[index]["username"]),
+                      ],
+                    ),
+                    onTap: () =>
+                        openProfile(context, list_following[index]["id"]),
+                  );
+                },
+              ),
+            ),
+            actions: <Widget>[
+              FlatButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text("Cancel"),
+              ),
+            ],
+          );
+        });
+  }
+
   editButton(BuildContext context) => Container(
-    padding: const EdgeInsets.only(top: 2),
-    child: TextButton(
-      onPressed: () => openEdit(context),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border.all(
-            color: Colors.black,
+        padding: const EdgeInsets.only(top: 2),
+        child: TextButton(
+          onPressed: () => openEdit(context),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(
+                color: Colors.black,
+              ),
+              borderRadius: BorderRadius.circular(5),
+            ),
+            alignment: Alignment.center,
+            child: const Text(
+              "Edit profile",
+              style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            width: 250,
+            height: 27,
           ),
-          borderRadius: BorderRadius.circular(5),
         ),
-        alignment: Alignment.center,
-        child: const Text(
-          "Edit profile",
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        width: 250,
-        height: 27,
-      ),
-    ),
-  );
+      );
 
   followButton(BuildContext context) => Container(
-    padding: const EdgeInsets.only(top: 2),
-    child: TextButton(
-      onPressed: () => _follow(),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.blue,
-          border: Border.all(
-            color: Colors.blue,
+        padding: const EdgeInsets.only(top: 2),
+        child: TextButton(
+          onPressed: () => _follow(),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.blue,
+              border: Border.all(
+                color: Colors.blue,
+              ),
+              borderRadius: BorderRadius.circular(5),
+            ),
+            alignment: Alignment.center,
+            child: const Text(
+              "Follow",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            width: 250,
+            height: 27,
           ),
-          borderRadius: BorderRadius.circular(5),
         ),
-        alignment: Alignment.center,
-        child: const Text(
-          "Follow",
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        width: 250,
-        height: 27,
-      ),
-    ),
-  );
-
+      );
 
   unfollowButton(BuildContext context) => Container(
-    padding: const EdgeInsets.only(top: 2),
-    child: TextButton(
-      onPressed: () => _unfollow(),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border.all(
-            color: Colors.black,
+        padding: const EdgeInsets.only(top: 2),
+        child: TextButton(
+          onPressed: () => _unfollow(),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(
+                color: Colors.black,
+              ),
+              borderRadius: BorderRadius.circular(5),
+            ),
+            alignment: Alignment.center,
+            child: const Text(
+              "Following",
+              style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            width: 250,
+            height: 27,
           ),
-          borderRadius: BorderRadius.circular(5),
         ),
-        alignment: Alignment.center,
-        child: const Text(
-          "Following",
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        width: 250,
-        height: 27,
-      ),
-    ),
-  );
-
+      );
 
   void _follow() async {
-
     following_users[widget.id] = 1;
     follower_users[googleSignIn.currentUser!.id] = 1;
 
@@ -301,11 +470,10 @@ class _ProfileScreenState extends State<ProfilePage> {
   }
 
   void _unfollow() async {
-    follower_users.removeWhere((key, value) =>
-        key == googleSignIn.currentUser!.id);
+    follower_users
+        .removeWhere((key, value) => key == googleSignIn.currentUser!.id);
 
-    following_users.removeWhere((key, value) =>
-        key == widget.id);
+    following_users.removeWhere((key, value) => key == widget.id);
 
     await _db
         .collection("insta_users")
@@ -349,9 +517,6 @@ class _ProfileScreenState extends State<ProfilePage> {
       ],
     );
   }
-
-
-
 }
 
 void openProfile(BuildContext context, String id) {
@@ -365,12 +530,13 @@ void openProfile(BuildContext context, String id) {
   }
 }
 
-void openEdit(BuildContext context){
+void openEdit(BuildContext context) {
   Navigator.of(context)
       .push(MaterialPageRoute<bool>(builder: (BuildContext context) {
     return EditProfile();
   }));
 }
+
 void _logout(BuildContext context) async {
   // print("logout");
   await auth.signOut();

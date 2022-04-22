@@ -69,8 +69,7 @@ class _MyStatefulWidgetState extends State<EditProfile> {
                               content: TextField(
                                   controller: editingController,
                                   decoration: const InputDecoration(
-                                    hintText: 'Enter bio .....'
-                                  )),
+                                      hintText: 'Enter bio .....')),
                               actions: <Widget>[
                                 TextButton(
                                   onPressed: () =>
@@ -136,11 +135,11 @@ class _MyStatefulWidgetState extends State<EditProfile> {
                   : const Padding(padding: EdgeInsets.only(top: 0.0)),
               const Padding(padding: EdgeInsets.only(top: 100.0)),
               // Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                Center(
-                    child: CircleAvatar(
-                  radius: 120.0, // Image radius
-                  backgroundImage: FileImage(file!),
-                ))
+              Center(
+                  child: CircleAvatar(
+                radius: 120.0, // Image radius
+                backgroundImage: FileImage(file!),
+              ))
               // ]),
             ]));
   }

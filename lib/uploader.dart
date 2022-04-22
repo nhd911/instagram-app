@@ -9,6 +9,9 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'main.dart';
 import 'package:uuid/uuid.dart';
+import 'package:camera_deep_ar/camera_deep_ar.dart';
+
+const apiKey = "cfe827da18228fcdcd7e28781492961ff2a5caecc39d39b2e61786acfbe6db4d5a2d8038470f24ad";
 
 class Uploader extends StatefulWidget {
   const Uploader({Key? key}) : super(key: key);
@@ -28,8 +31,8 @@ class _MyStatefulWidgetState extends State<Uploader> {
     return file == null
         ? Scaffold(
             appBar: AppBar(
-              title:
-                  const Text("Upload image", style: TextStyle(color: Colors.black)),
+              title: const Text("Upload image",
+                  style: TextStyle(color: Colors.black)),
               backgroundColor: Colors.white70,
             ),
             body: Container(
@@ -90,7 +93,10 @@ class _MyStatefulWidgetState extends State<Uploader> {
               ],
             ),
             body: PostImage(
-                imageFile: file, descriptionController: descriptionController, loading: uploading,));
+              imageFile: file,
+              descriptionController: descriptionController,
+              loading: uploading,
+            ));
   }
 
   _selectImage(BuildContext parentContext) async {

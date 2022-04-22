@@ -94,17 +94,21 @@ class _SearchPage extends State<SearchPage>
                                 // ),
                                 Row(
                                   children: [
-                                    Container(
-                                        height: 40.0,
-                                        width: 40.0,
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          image: DecorationImage(
-                                            fit: BoxFit.fill,
-                                            image: NetworkImage(
-                                                document["photoUrl"]),
-                                          ),
-                                        )),
+                                    // Container(
+                                    //     height: 40.0,
+                                    //     width: 40.0,
+                                    //     decoration: BoxDecoration(
+                                    //       shape: BoxShape.circle,
+                                    //       image: DecorationImage(
+                                    //         fit: BoxFit.fill,
+                                    //         image: NetworkImage(
+                                    //             document["photoUrl"]),
+                                    //       ),
+                                    //     )),
+                                    CircleAvatar(
+                                      backgroundImage: NetworkImage(document["photoUrl"]),
+                                      radius: 18,
+                                    ),
                                     const SizedBox(
                                       width: 10.0,
                                     ),
